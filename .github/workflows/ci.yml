@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build and test
+        run: ./mvnw -B -ntp verify
+      - name: Smoke test the executable jar
+        run: |
+          test "$(java -jar target/triangle-classifier.jar 3 3 3)" = "Equilateral"
+          test "$(java -jar target/triangle-classifier.jar 3 3 2)" = "Isosceles"
+          test "$(java -jar target/triangle-classifier.jar 3 4 5)" = "Scalene"
+          ! java -jar target/triangle-classifier.jar 1 2 3
